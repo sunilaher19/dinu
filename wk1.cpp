@@ -39,6 +39,9 @@ void wroker2::ProcessData(TradeInformation data, std::string &symbol, int interv
         initTIme = data.ts1  / 1000000000;;
         datetime = gmtime(&initTIme);
         date = mktime(datetime); 
+        SetOpen(data.price);
+        SetHigh(data.price);
+        SetLow(data.price);
     }
     
     now = gmtime(&temptime);
@@ -46,10 +49,22 @@ void wroker2::ProcessData(TradeInformation data, std::string &symbol, int interv
     auto seconds = difftime(t,date);
     
     
-    cout << "seconds =" << seconds << " mktime(now)= " << t<< " mktime(datetime)=" << date  << " :initTIme=" << initTIme << ": temptime " << temptime <<endl;
+    //cout << "seconds =" << seconds << " mktime(now)= " << t<< " mktime(datetime)=" << date  << " :initTIme=" << initTIme << ": temptime " << temptime <<endl;
 
     if(seconds <= interval)
     {
+        if(data.price > GetHigh())
+        {
+            SetHigh(data.price);
+        }
+        else if(data.price < GetLow())
+        {
+            SetLow(data.price);
+        }
+
+        SetVolume(data.qty);
+        SetClose(data.price);
+
         BarGraph bargharstrucr;
         firstIntervbalTrade = false;
         bargharstrucr.symbol = data.symbol;
@@ -57,19 +72,46 @@ void wroker2::ProcessData(TradeInformation data, std::string &symbol, int interv
         bargharstrucr.qty = data.qty;
         bargharstrucr.ts1 = data.ts1;
         bargharstrucr.bar_num = bar_graph;
+        bargharstrucr.open = GetOpen();
+        bargharstrucr.close = 0;
+        bargharstrucr.high = GetHigh();
+        bargharstrucr.volume = GetVolume();
+        bargharstrucr.low = GetLow();
         barGraph.push_back(bargharstrucr) ;
-        cout << bargharstrucr.ToString() << endl; 
+        return;
     }
 
+    
 
     if(seconds > interval)
     {
+        PrintQueue(barGraph);
         cout << endl;
         cout << endl;
         firstIntervbalTrade=true;
         ++bar_graph;
+        resetValue();
         ProcessData(data, symbol, interval);
     }
+    else if(barGraph.size() > 0)
+    {
+        PrintQueue(barGraph);
+        resetValue();
+    }
 
+}
+
+void wroker2::PrintQueue(vector<BarGraph> &barGraph)
+{
+    for(int i=0 ; i< barGraph.size()-1 ; i++)
+    {
+        auto info = barGraph[i];
+        cout << info.ToString() <<endl;
+    }
+    
+    auto info = barGraph[barGraph.size()-1 ];
+    info.close = GetClose();
+    cout << info.ToString() << endl;
+    barGraph.clear();
 
 }

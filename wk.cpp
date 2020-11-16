@@ -34,7 +34,7 @@ void wroker1::Init(std::string path, queue<TradeInformation>& tradeData, bool& d
                     tradeInfo.symbol = strTree.get<string>("sym");
                     tradeInfo.trade = strTree.get<string>("T");
                     tradeInfo.price = stoll(strTree.get<string>("P"));
-                    tradeInfo.qty = stoll(strTree.get<string>("Q"));
+                    tradeInfo.qty = stod(strTree.get<string>("Q"));
                     tradeInfo.ts =  stoll(strTree.get<string>("TS"));
                     tradeInfo.ts1 = stoll(strTree.get<string>("TS2"));
                     std::unique_lock<std::mutex> lck(mtx);
